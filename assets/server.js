@@ -9,11 +9,14 @@ const connection = mysql.createConnection({
 
   password: "",
 
-  database: "",
+  database: "employee",
 });
 
 connection.connect((err) => {
   if (err) throw err;
-  console.log(`connected as id ${connection.threadid}`);
-  afterConnection();
+  runSearch();
 });
+
+const runSearch = () => {
+  inquirer.prompt({});
+};
