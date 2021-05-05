@@ -1,16 +1,16 @@
-DROP DATABASE IF EXISTS employee_DB;
+DROP DATABASE IF EXISTS employee2_DB;
 
-CREATE DATABASE employee_DB;
+CREATE DATABASE employee2_DB;
 
-USE employee_DB;
+USE employee2_DB;
 
 CREATE TABLE department (
     id INT NOT NULL AUTO_INCREMENT,
-    name VARCHAR(30) NULL,
+    name VARCHAR(30) NOT NULL,
     PRIMARY KEY (id)
 );
 
-CREATE TABLE role (
+CREATE TABLE roles (
     id INT NOT NULL AUTO_INCREMENT,
     title VARCHAR(30)NULL,
     salary DECIMAL (10,4),
@@ -27,6 +27,4 @@ CREATE TABLE employee (
     PRIMARY KEY (id)
 );
 
-SELECT * FROM department;
-SELECT * FROM role;
-SELECT * FROM employee;
+
