@@ -35,6 +35,7 @@ const runSearch = () => {
         "View All Employees By Manager Role",
         "Add Employee",
         "Remove Employee",
+        "Add Department",
         "Update Employee Role",
         "Update Employee Manager",
       ],
@@ -58,6 +59,9 @@ const runSearch = () => {
         case "Update Employee":
           updateEmployeeSearch();
           break;
+        case "Add Department":
+          addDepartment();
+          break;
         case "Remove Employee":
           removeEmployeeSearch();
           break;
@@ -80,13 +84,13 @@ const employeeSearch = () => {
     connection.end();
   });
 };
-const departmentSearch = () => {
-  connection.query("SELECT * FROM department", (err, res) => {
-    if (err) throw err;
-    console.log(res);
-    connection.end();
-  });
-};
+// const departmentSearch = () => {
+//   connection.query("SELECT * FROM department", (err, res) => {
+//     if (err) throw err;
+//     console.log(res);
+//     connection.end();
+//   });
+// };
 
 const managerSearch = () => {
   connection.query("SELECT * FROM roles", (err, res) => {
@@ -165,4 +169,71 @@ const insertEmployee = () => {
       );
     });
 };
+
+const addDepartment = () => {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "departmentName",
+        message: "What Department would you like to add?",
+      },
+    ])
+    .then(function (res) {
+      console.log(res);
+      const query = connection.query(
+        "INSERT INTO departments SET ?",
+        {
+          name: res.deptName,
+        },
+        function (err, res) {
+          connection.query("SELECT * FROM departments", function (err, res) {
+            console.table(res);
+            runSearch();
+          });
+        }
+      );
+    });
+};
+
+const departmentSearch = () => {
+  connection.query("SELECT * FROM departments", function (err, res) {
+    console.table(res);
+    runSearch();
+  });
+};
+
+const roleSearch = () => {
+  // ​connection.query("SELECT * FROM roles",
+  // function(err,res){
+
+  //   let employee = res.map(employee => ({name: employee.first_name + " " + employee.last_name, value: employee.id}))
+  // ​
+  inquirer
+    .prompt([
+      {
+        type: "list",
+        name: "employeeName",
+        message: "Which employee's role would you like to update?",
+        choices: "employee",
+      },
+      {
+        type: "input",
+        name: "role",
+        message: "What is your new role?",
+      },
+    ])
+    .then(function (res) {
+      connection.query(
+        `UPDATE employee SET role_id = ${res.role} WHERE id = ${res.employeeName}`,
+        function (err, res) {
+          console.log(res);
+
+          runSearch();
+        }
+      );
+    });
+};
+// )
+// }
 // afterConnection();
