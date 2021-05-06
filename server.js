@@ -1,12 +1,13 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
+const cTable = require("console.table");
 
 const connection = mysql.createConnection({
   host: "localhost",
 
   user: "root",
 
-  database: "employee2_DB",
+  database: "employee_DB",
 });
 
 // const afterConnection = () => {
@@ -51,6 +52,9 @@ const runSearch = () => {
         case "View All Employees By Manager Role":
           managerSearch();
           break;
+        case "Add Employee":
+          addEmployeeSearch();
+          break;
         case "Update Employee":
           updateEmployeeSearch();
           break;
@@ -92,47 +96,71 @@ const managerSearch = () => {
   });
 };
 
-const addEmployee = () => {
+const addEmployeeSearch = () => {
+  console.log("Inserting an employee!");
+
+  const query = `SELECT r.id, r.title, r.salary 
+      FROM role r`;
+
+  connection.query(query, function (err, res) {
+    if (err) throw err;
+
+    const selectRole = res.map(({ id, title, salary }) => ({
+      value: id,
+      title: `${title}`,
+      salary: `${salary}`,
+    }));
+
+    insertEmployee(selectRole);
+  });
+};
+
+const insertEmployee = () => {
   inquirer
     .prompt([
       {
         name: "fistname",
         type: "input",
-        message: "Enter their first name",
+        message: "Enter their first name?",
       },
       {
         name: "lastname",
         type: "input",
-        message: "Enter their last name",
+        message: "Enter their last name?",
       },
       {
-        name: "roleID",
+        name: "roleid",
         type: "input",
-        message: "What is their role id",
-        choices: selectRole(),
+        message: "What is their role id?",
+        choices: "selectRole",
       },
       {
-        name: "choice",
+        name: "managerid",
         type: "input",
-        message: "What is manager id",
-        choices: selectManager(),
+        message: "What is their manager id?",
+        choices: "selectManager",
       },
     ])
-    .then(function (val) {
-      const roleID = selectRole().indexof(val.role) + 1;
-      const managerID = selectManager().indexof(val.choice) + 1;
+    .then(function (answer) {
+      console.log(answer);
+
+      const query = `INSERT INTO employee SET ?`;
+
       connection.query(
-        "INSERT INTO employee SET?",
+        query,
         {
-          first_name: val.firstName,
-          last_name: val.lastName,
-          manager_id: managerId,
-          role_id: roleId,
+          first_name: answer.first_name,
+          last_name: answer.last_name,
+          role_id: answer.roleId,
+          manager_id: answer.managerid,
         },
-        function (err) {
+        function (err, res) {
           if (err) throw err;
-          console.table(val);
-          startPrompt();
+
+          console.table(res);
+          console.log(res.insertedRows + "Inserted successfully!\n");
+
+          runSearch();
         }
       );
     });

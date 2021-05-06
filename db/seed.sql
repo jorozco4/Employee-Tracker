@@ -1,4 +1,4 @@
-USE employee2_DB
+USE employee_DB
 
 -- Department info
 
