@@ -31,7 +31,7 @@ const runSearch = () => {
       choices: [
         "View All Employees",
         "View All Employees By Department",
-        "View All Employees By Manager",
+        "View All Employees By Manager Role",
         "Add Employee",
         "Remove Employee",
         "Update Employee Role",
@@ -40,17 +40,18 @@ const runSearch = () => {
     })
 
     .then((answer) => {
-      switch (answer.action) {
-        case "View all employees":
+      console.log(answer.answerQuestion);
+      switch (answer.answerQuestion) {
+        case "View All Employees":
           employeeSearch();
           break;
-        case "View all employees by department":
+        case "View All Employees By Department":
           departmentSearch();
           break;
-        case "View all employees by manager":
+        case "View All Employees By Manager Role":
           managerSearch();
           break;
-        case "Update employee":
+        case "Update Employee":
           updateEmployeeSearch();
           break;
         case "Remove Employee":
@@ -63,10 +64,9 @@ const runSearch = () => {
           updateManagerSearch();
           break;
         default:
-          console.log(`Invalid action: ${answer.action}`);
+          console.log(`Invalid action: ${answer.answerQuestion}`);
           break;
       }
-      console.log(answer);
     });
 };
 const employeeSearch = () => {
@@ -84,4 +84,57 @@ const departmentSearch = () => {
   });
 };
 
+const managerSearch = () => {
+  connection.query("SELECT * FROM roles", (err, res) => {
+    if (err) throw err;
+    console.log(res);
+    connection.end();
+  });
+};
+
+const addEmployee = () => {
+  inquirer
+    .prompt([
+      {
+        name: "fistname",
+        type: "input",
+        message: "Enter their first name",
+      },
+      {
+        name: "lastname",
+        type: "input",
+        message: "Enter their last name",
+      },
+      {
+        name: "roleID",
+        type: "input",
+        message: "What is their role id",
+        choices: selectRole(),
+      },
+      {
+        name: "choice",
+        type: "input",
+        message: "What is manager id",
+        choices: selectManager(),
+      },
+    ])
+    .then(function (val) {
+      const roleID = selectRole().indexof(val.role) + 1;
+      const managerID = selectManager().indexof(val.choice) + 1;
+      connection.query(
+        "INSERT INTO employee SET?",
+        {
+          first_name: val.firstName,
+          last_name: val.lastName,
+          manager_id: managerId,
+          role_id: roleId,
+        },
+        function (err) {
+          if (err) throw err;
+          console.table(val);
+          startPrompt();
+        }
+      );
+    });
+};
 // afterConnection();
