@@ -12,6 +12,12 @@ I want to be able to view and manage the departments, roles, and employees in my
 So that I can organize and plan my business
 ```
 
+# Screen Shots
+
+![image](https://user-images.githubusercontent.com/61666288/117521529-4302e200-af7c-11eb-88b6-360d41f9437f.png)
+
+![image](https://user-images.githubusercontent.com/61666288/117521561-72b1ea00-af7c-11eb-80a6-71b80404890c.png)
+
 ## Installation
 
 This app is installed by using mysql, inquirer, and node server.js.

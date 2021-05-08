@@ -17,7 +17,7 @@ connection.connect(function (err) {
   console.log("connected as id " + connection.threadId + "\n");
   runSearch();
 });
-
+//List questions to answer
 const runSearch = () => {
   inquirer
     .prompt({
@@ -30,6 +30,7 @@ const runSearch = () => {
         "View All Employees By Role",
         "Add Employee",
         "Add Department",
+        "Add Role",
         "Update Employee Role",
         "Exit",
       ],
@@ -55,6 +56,10 @@ const runSearch = () => {
         case "Add Department":
           addDepartment();
           break;
+        case "Add Role":
+          addRole();
+          break;
+
         case "Update Employee Role":
           updateEmpRole();
           break;
@@ -65,14 +70,14 @@ const runSearch = () => {
       }
     });
 };
-
+// View All Employees
 const viewAllEmployees = () => {
   connection.query("SELECT * FROM employee", function (err, data) {
     console.table(data);
     runSearch();
   });
 };
-
+//Vieww All Employee By Department
 const viewAllEmpByDep = () => {
   let query = "SELECT * FROM department";
   connection.query(query, function (err, res) {
@@ -81,7 +86,7 @@ const viewAllEmpByDep = () => {
     runSearch();
   });
 };
-
+//View All Employees By Role
 const viewAllEmpByRole = () => {
   const query = "SELECT * FROM roles";
   connection.query(query, function (err, res) {
@@ -90,7 +95,7 @@ const viewAllEmpByRole = () => {
     runSearch();
   });
 };
-
+//Adds Employees
 const addEmployee = () => {
   console.log("Inserting a new employee.\n");
   inquirer
@@ -111,26 +116,18 @@ const addEmployee = () => {
         name: "role_id",
         choices: [1, 2, 3],
       },
-      {
-        type: "input",
-        message: "Who is their manager?",
-        name: "manager_id",
-      },
     ])
     .then(function (res) {
-      const query = connection.query(
-        "INSERT INTO employees SET ?",
-        res,
-        function (err, res) {
-          if (err) throw err;
-          console.log("Employee added!\n");
-
-          runSearch();
-        }
-      );
+      const employee = res.employee;
+      const query = `INSERT INTO department (name) VALUES("${employee}")`;
+      connection.query(query, function (err, res) {
+        if (err) throw err;
+        console.table(res);
+        runSearch();
+      });
     });
 };
-
+//Adds Departments
 const addDepartment = () => {
   inquirer
     .prompt({
@@ -148,7 +145,38 @@ const addDepartment = () => {
       });
     });
 };
-
+//Adds Employee Roles
+const addRole = () => {
+  inquirer
+    .prompt([
+      {
+        message: "enter title:",
+        type: "input",
+        name: "title",
+      },
+      {
+        message: "enter salary:",
+        type: "number",
+        name: "salary",
+      },
+      {
+        message: "enter department ID:",
+        type: "number",
+        name: "department_id",
+      },
+    ])
+    .then(function (response) {
+      connection.query(
+        "INSERT INTO roles (title, salary, department_id) values (?, ?, ?)",
+        [response.title, response.salary, response.department_id],
+        function (err, data) {
+          console.table(data);
+        }
+      );
+      runSearch();
+    });
+};
+//Updates Employee Role
 const updateEmpRole = () => {
   inquirer
     .prompt([
