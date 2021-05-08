@@ -1,25 +1,20 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
-const cTable = require("console.table");
+const consoleTable = require("console.table");
 
 const connection = mysql.createConnection({
   host: "localhost",
 
   user: "root",
 
+  password: "",
+
   database: "employee_DB",
 });
 
-// const afterConnection = () => {
-//   connection.query("SELECT * FROM departments", (err, res) => {
-//     if (err) throw new Error(err);
-//     console.log(res);
-//     connection.end();
-//   });
-// };
-
-connection.connect((err) => {
+connection.connect(function (err) {
   if (err) throw err;
+  console.log("connected as id " + connection.threadId + "\n");
   runSearch();
 });
 
@@ -27,142 +22,108 @@ const runSearch = () => {
   inquirer
     .prompt({
       type: "list",
-      name: "answerQuestion",
+      name: "action",
       message: "What would you like to do?",
       choices: [
         "View All Employees",
         "View All Employees By Department",
-        "View All Employees By Manager Role",
+        "View All Employees By Role",
         "Add Employee",
-        "Remove Employee",
         "Add Department",
         "Update Employee Role",
-        "Update Employee Manager",
+        "Exit",
       ],
     })
 
     .then((answer) => {
-      console.log(answer.answerQuestion);
-      switch (answer.answerQuestion) {
+      switch (answer.action) {
         case "View All Employees":
-          employeeSearch();
+          viewAllEmployees();
           break;
         case "View All Employees By Department":
-          departmentSearch();
+          viewAllEmpByDep();
           break;
-        case "View All Employees By Manager Role":
-          managerSearch();
+        case "View All Employees By Role":
+          viewAllEmpByRole();
           break;
         case "Add Employee":
-          addEmployeeSearch();
+          addEmployee();
           break;
         case "Update Employee":
-          updateEmployeeSearch();
+          updateEmployee();
           break;
         case "Add Department":
           addDepartment();
           break;
-        case "Remove Employee":
-          removeEmployeeSearch();
-          break;
         case "Update Employee Role":
-          roleSearch();
+          updateEmpRole();
           break;
-        case "Update Employee Manager":
-          updateManagerSearch();
-          break;
-        default:
-          console.log(`Invalid action: ${answer.answerQuestion}`);
+
+        case "Exit":
+          connection.end();
           break;
       }
     });
 };
-const employeeSearch = () => {
-  connection.query("SELECT * FROM employee", (err, res) => {
-    if (err) throw err;
-    console.log(res);
-    connection.end();
-  });
-};
-// const departmentSearch = () => {
-//   connection.query("SELECT * FROM department", (err, res) => {
-//     if (err) throw err;
-//     console.log(res);
-//     connection.end();
-//   });
-// };
 
-const managerSearch = () => {
-  connection.query("SELECT * FROM roles", (err, res) => {
-    if (err) throw err;
-    console.log(res);
-    connection.end();
+const viewAllEmployees = () => {
+  connection.query("SELECT * FROM employee", function (err, data) {
+    console.table(data);
+    runSearch();
   });
 };
 
-const addEmployeeSearch = () => {
-  console.log("Inserting an employee!");
-
-  const query = `SELECT r.id, r.title, r.salary 
-      FROM role r`;
-
+const viewAllEmpByDep = () => {
+  let query = "SELECT * FROM department";
   connection.query(query, function (err, res) {
     if (err) throw err;
-
-    const selectRole = res.map(({ id, title, salary }) => ({
-      value: id,
-      title: `${title}`,
-      salary: `${salary}`,
-    }));
-
-    insertEmployee(selectRole);
+    console.table(res);
+    runSearch();
   });
 };
 
-const insertEmployee = () => {
+const viewAllEmpByRole = () => {
+  const query = "SELECT * FROM roles";
+  connection.query(query, function (err, res) {
+    if (err) throw err;
+    console.table(res);
+    runSearch();
+  });
+};
+
+const addEmployee = () => {
+  console.log("Inserting a new employee.\n");
   inquirer
     .prompt([
       {
-        name: "fistname",
         type: "input",
-        message: "Enter their first name?",
+        message: "First Name?",
+        name: "first_name",
       },
       {
-        name: "lastname",
         type: "input",
-        message: "Enter their last name?",
+        message: "Last Name?",
+        name: "last_name",
       },
       {
-        name: "roleid",
-        type: "input",
-        message: "What is their role id?",
-        choices: "selectRole",
+        type: "list",
+        message: "What is the employee's role?",
+        name: "role_id",
+        choices: [1, 2, 3],
       },
       {
-        name: "managerid",
         type: "input",
-        message: "What is their manager id?",
-        choices: "selectManager",
+        message: "Who is their manager?",
+        name: "manager_id",
       },
     ])
-    .then(function (answer) {
-      console.log(answer);
-
-      const query = `INSERT INTO employee SET ?`;
-
-      connection.query(
-        query,
-        {
-          first_name: answer.first_name,
-          last_name: answer.last_name,
-          role_id: answer.roleId,
-          manager_id: answer.managerid,
-        },
+    .then(function (res) {
+      const query = connection.query(
+        "INSERT INTO employees SET ?",
+        res,
         function (err, res) {
           if (err) throw err;
-
-          console.table(res);
-          console.log(res.insertedRows + "Inserted successfully!\n");
+          console.log("Employee added!\n");
 
           runSearch();
         }
@@ -172,68 +133,46 @@ const insertEmployee = () => {
 
 const addDepartment = () => {
   inquirer
-    .prompt([
-      {
-        type: "input",
-        name: "departmentName",
-        message: "What Department would you like to add?",
-      },
-    ])
+    .prompt({
+      type: "input",
+      message: "What is the name of the department you want to add?",
+      name: "department",
+    })
     .then(function (res) {
-      console.log(res);
-      const query = connection.query(
-        "INSERT INTO departments SET ?",
-        {
-          name: res.deptName,
-        },
-        function (err, res) {
-          connection.query("SELECT * FROM departments", function (err, res) {
-            console.table(res);
-            runSearch();
-          });
-        }
-      );
+      const department = res.department;
+      const query = `INSERT INTO department (name) VALUES("${department}")`;
+      connection.query(query, function (err, res) {
+        if (err) throw err;
+        console.table(res);
+        runSearch();
+      });
     });
 };
 
-const departmentSearch = () => {
-  connection.query("SELECT * FROM departments", function (err, res) {
-    console.table(res);
-    runSearch();
-  });
-};
-
-const roleSearch = () => {
-  // ​connection.query("SELECT * FROM roles",
-  // function(err,res){
-
-  //   let employee = res.map(employee => ({name: employee.first_name + " " + employee.last_name, value: employee.id}))
-  // ​
+const updateEmpRole = () => {
   inquirer
     .prompt([
       {
-        type: "list",
-        name: "employeeName",
-        message: "Which employee's role would you like to update?",
-        choices: "employee",
+        type: "input",
+        message: "Which employee would you like to update?",
+        name: "employeeUpdate",
       },
+
       {
         type: "input",
-        name: "role",
-        message: "What is your new role?",
+        message: "What do you want to update to?",
+        name: "updateRole",
       },
     ])
-    .then(function (res) {
+    .then(function (answer) {
       connection.query(
-        `UPDATE employee SET role_id = ${res.role} WHERE id = ${res.employeeName}`,
+        "UPDATE employee SET role_id=? WHERE first_name= ?",
+        [answer.updateRole, answer.employeeUpdate],
         function (err, res) {
-          console.log(res);
-
+          if (err) throw err;
+          console.table(res);
           runSearch();
         }
       );
     });
 };
-// )
-// }
-// afterConnection();

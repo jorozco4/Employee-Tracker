@@ -1,5 +1,5 @@
 {
-  "name": "assets",
+  "name": "employee-tracker",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
