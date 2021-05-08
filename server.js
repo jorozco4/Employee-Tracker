@@ -1,8 +1,6 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const consoleTable = require("console.table");
-const chalk = require("chalk");
-const figlet = require("figlet");
 
 const connection = mysql.createConnection({
   host: "localhost",

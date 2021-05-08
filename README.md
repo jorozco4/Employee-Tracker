@@ -18,6 +18,10 @@ So that I can organize and plan my business
 
 ![image](https://user-images.githubusercontent.com/61666288/117521561-72b1ea00-af7c-11eb-80a6-71b80404890c.png)
 
+# Walk Through Video
+
+https://drive.google.com/file/d/1Ss8OYk7kGmbtUrG2PjdtpFqeenxqzFm5/view
+
 ## Installation
 
 This app is installed by using mysql, inquirer, and node server.js.
@@ -29,7 +33,7 @@ In order to run this test the user must open the terminal, call node server.js, 
 ## Contact Info
 
 GitHub Username: jorozco4
-https://github.com/jorozco4/README.MD-GENERATOR
+https://jorozco4.github.io/Employee-Tracker/
 
 Email: orozcojesse0@gmail.com
 
